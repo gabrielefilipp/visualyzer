@@ -1,0 +1,17 @@
+Package: com.xyaman.visualyzer
+Name: Visualyzer
+Version: 1.0
+Description: Simple status bar audio visualizer.
+Section: Tweaks
+Depends: firmware (>= 14.0), mobilesubstrate, preferenceloader, com.ryannair05.audiosnapshotserver
+Conflicts: 
+Replaces: 
+Priority: optional
+Architecture: iphoneos-arm
+Author: Xyaman
+dev: Xyaman
+Homepage: https://repo.xyaman.xyz/depictions/index.html?p=visualyzer
+Depiction: https://repo.xyaman.xyz/depictions/index.html?p=visualyzer
+Maintainer: Xyaman
+SileoDepiction: https://repo.xyaman.xyz/depictions/visualyzer/depiction.json
+Icon: https://repo.xyaman.xyz/depictions/visualyzer/assets/icon.png
