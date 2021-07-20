@@ -11,5 +11,4 @@
 @property (nonatomic, strong) UIColor *pointColor;
 @property (nonatomic, strong, readonly) NSMutableArray<CALayer*> *bars;
 -(void)handleSingleTap:(UITapGestureRecognizer *)recognizer;
--(void)handleHoldTap:(UITapGestureRecognizer *)recognizer;
 @end

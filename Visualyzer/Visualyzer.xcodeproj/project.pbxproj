@@ -21,6 +21,7 @@
 		C15A40C326A5AC1D00431E07 /* AudioManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C15A40BC26A5AC1D00431E07 /* AudioManager.m */; };
 		C15A40C426A5AC1D00431E07 /* VisualyzerView.m in Sources */ = {isa = PBXBuildFile; fileRef = C15A40BD26A5AC1D00431E07 /* VisualyzerView.m */; };
 		C15A40D126A5AFFE00431E07 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C15A40D026A5AFFE00431E07 /* Accelerate.framework */; };
+		C15A40D626A6D68800431E07 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C15A40D526A6D68800431E07 /* AudioToolbox.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +45,7 @@
 		C15A40BC26A5AC1D00431E07 /* AudioManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioManager.m; sourceTree = "<group>"; };
 		C15A40BD26A5AC1D00431E07 /* VisualyzerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VisualyzerView.m; sourceTree = "<group>"; };
 		C15A40D026A5AFFE00431E07 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/Library/Frameworks/Accelerate.framework; sourceTree = DEVELOPER_DIR; };
+		C15A40D526A6D68800431E07 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/Library/Frameworks/AudioToolbox.framework; sourceTree = DEVELOPER_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,6 +53,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C15A40D626A6D68800431E07 /* AudioToolbox.framework in Frameworks */,
 				C15A40D126A5AFFE00431E07 /* Accelerate.framework in Frameworks */,
 				C15A40AF26A57D9A00431E07 /* QuartzCore.framework in Frameworks */,
 				C15A40B026A57D9A00431E07 /* UIKit.framework in Frameworks */,
@@ -84,6 +87,7 @@
 		C15A408F26A57C7D00431E07 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C15A40D526A6D68800431E07 /* AudioToolbox.framework */,
 				C15A40D026A5AFFE00431E07 /* Accelerate.framework */,
 				C15A40A726A57D9800431E07 /* libsubstrate.dylib */,
 				C15A40A826A57D9800431E07 /* CoreFoundation.framework */,

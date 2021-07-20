@@ -1,6 +1,8 @@
 #import <UIKit/UIKit.h>
 #import <Accelerate/Accelerate.h>
 #import <arpa/inet.h>
+#import <AudioToolbox/AudioToolbox.h>
+
 #import "AudioManagerDelegate.h"
 
 #define SA struct sockaddr

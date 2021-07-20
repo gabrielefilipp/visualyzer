@@ -83,6 +83,7 @@
     if ([[%c(SBMediaController) sharedInstance] isPlaying] && self.shortTime) {
         self.hidden = YES;
         self.vizView.hidden = NO;
+        [self.vizView setFrame:self.frame];
     }else{
         self.hidden = NO;
         self.vizView.hidden = YES;
@@ -104,6 +105,13 @@
     }
 }
 
+-(void)setFrame:(CGRect)frame {
+    %orig;
+    if (self.vizView) {
+        [self.vizView setFrame:self.frame];
+    }
+}
+
 -(void)removeFromSuperview {
     %orig;
     if (self.vizView) {
@@ -113,17 +121,22 @@
 
 -(void)setText:(NSString*)arg1 {
     %orig;
+    if (self.vizView) {
+        [self.vizView setFrame:self.frame];
+    }
 }
 
 -(void)setTextColor:(UIColor *)textColor {
     %orig;
     if (self.vizView) {
         self.vizView.pointColor = textColor;
+        [self.vizView setFrame:self.frame];
     }
 }
 
 -(void)dealloc {
     if (self.vizView) {
+        self.vizView.parent = NULL;
         [self.vizView removeFromSuperview];
         self.vizView = NULL;
     }
