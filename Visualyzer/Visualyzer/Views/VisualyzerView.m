@@ -1,13 +1,14 @@
 #import "VisualyzerView.h"
 
-#define pointSensitivity 1.0f
 #define pointRadius 1.0f
-#define pointSpacing 1.0f //halved
-#define pointWidth 3.6f
+#define pointSpacing 0.8f //halved, cause it (*|*)(*|*), where "*" is the spacing and "|" is bar
+#define pointWidth 3.0f
 #define pointMargin 5.0f
 
+#define sensitivity 0.95f
+#define gain 50.0f
+
 #define MIN_HZ 20
-#define MAX_HZ 20000
 
 @interface VisualyzerView ()
 @end
@@ -17,12 +18,14 @@
 +(NSUInteger)numberOfPointsForWidth:(CGFloat)width {
     CGFloat w = (width - pointMargin * 2.0f);
     CGFloat s = (pointSpacing + pointWidth + pointSpacing);
-    NSUInteger p = floor(w / s);
-    return p > 10 ? 10 : p;
+    return fmin(floor(w / s), 10);
+    //return floor(w / s);
 }
 
 -(instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
+        _render = NO;
+        
         self.pointColor = [UIColor whiteColor];
         
         _bars = [NSMutableArray array];
@@ -39,7 +42,7 @@
 }
 
 - (void)handleSingleTap:(UITapGestureRecognizer *)recognizer {
-    if (self.parent.shortTime) {
+    if (_render) {
         SBApplication *nowPlayingApp = [[NSClassFromString(@"SBMediaController") sharedInstance] nowPlayingApplication];
         if(nowPlayingApp) {
             [[UIApplication sharedApplication] launchApplicationWithIdentifier:nowPlayingApp.bundleIdentifier suspended:NO];
@@ -48,33 +51,31 @@
 }
 
 -(void)renderBarsInFrame:(CGRect)frame {
-    if (self.parent.shortTime) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSUInteger n = _bars.count;
-            NSUInteger points = [self.class numberOfPointsForWidth:frame.size.width];
-            if (points > n) {
-                for (NSUInteger i = 0; i < points - n; i++) {
-                    CALayer *bar = [CALayer layer];
-                    [self.layer addSublayer:bar];
-                    [_bars addObject:bar];
-                }
-            }else if (points < n) {
-                for (NSUInteger i = 0; i < n - points; i++) {
-                    CALayer *bar = [_bars objectAtIndex:i];
-                    [bar removeFromSuperlayer];
-                    [_bars removeObject:bar];
-                }
+    if (_render) {
+        NSUInteger n = _bars.count;
+        NSUInteger points = [self.class numberOfPointsForWidth:frame.size.width];
+        if (points > n) {
+            for (NSUInteger i = 0; i < points - n; i++) {
+                CALayer *bar = [CALayer layer];
+                [self.layer addSublayer:bar];
+                [_bars addObject:bar];
             }
-            
-            CGFloat x = pointMargin + (frame.size.width - pointMargin * 2.0f - (pointSpacing + pointWidth + pointSpacing) * points) / 2.0f;
-            
-            for (CALayer *bar in _bars) {
-                bar.frame = CGRectMake(x + pointSpacing, frame.size.height, pointWidth, 0);
-                bar.backgroundColor = self.pointColor.CGColor;
-                bar.cornerRadius = pointRadius;
-                x = x + pointSpacing + pointWidth + pointSpacing;
+        }else if (points < n) {
+            for (NSUInteger i = 0; i < n - points; i++) {
+                CALayer *bar = [_bars objectAtIndex:0];
+                [bar removeFromSuperlayer];
+                [_bars removeObject:bar];
             }
-        });
+        }
+        
+        CGFloat x = pointMargin + (frame.size.width - pointMargin * 2.0f - (pointSpacing + pointWidth + pointSpacing) * points) / 2.0f;
+        
+        for (CALayer *bar in _bars) {
+            bar.frame = CGRectMake(x + pointSpacing, frame.size.height, pointWidth, 0.0f);
+            bar.backgroundColor = self.pointColor.CGColor;
+            bar.cornerRadius = pointRadius;
+            x = x + pointSpacing + pointWidth + pointSpacing;
+        }
     }
 }
 
@@ -84,102 +85,118 @@
 }
 
 -(void)mediaControllerStateChanged:(BOOL)state {
-    if (self.parent.shortTime) {
-        if (state) {
-            [self renderBarsInFrame:self.frame];
-            [UIView animateWithDuration:0.35 animations:^{
-                self.alpha = 1.0;
-                self.parent.alpha = 0.0;
-            }completion:^(BOOL finished) {
-                self.hidden = NO;
-                self.parent.hidden = YES;
-            }];
-        }else{
-            [UIView animateWithDuration:0.35 animations:^{
-                self.alpha = 0.0;
-                self.parent.alpha = 1.0;
-            }completion:^(BOOL finished) {
-                self.hidden = YES;
-                self.parent.hidden = NO;
-            }];
-            for(NSUInteger i = 0; i < _bars.count; i++) {
-                CALayer *bar = [_bars objectAtIndex:i];
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    bar.backgroundColor = self.pointColor.CGColor;
-                    bar.frame = CGRectMake(bar.frame.origin.x, self.frame.size.height, bar.frame.size.width, 0);
-                });
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (_render) {
+            if (state) {
+                [self renderBarsInFrame:self.frame];
+                [UIView animateWithDuration:0.35 animations:^{
+                    self.alpha = 1.0;
+                    self.parent.alpha = 0.0;
+                }completion:^(BOOL finished) {
+                    self.hidden = NO;
+                    self.parent.hidden = YES;
+                }];
+            }else{
+                [UIView animateWithDuration:0.35 animations:^{
+                    self.alpha = 0.0;
+                    self.parent.alpha = 1.0;
+                }completion:^(BOOL finished) {
+                    self.hidden = YES;
+                    self.parent.hidden = NO;
+                }];
+                for(NSUInteger i = 0; i < _bars.count; i++) {
+                    CALayer *bar = [_bars objectAtIndex:i];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        bar.backgroundColor = self.pointColor.CGColor;
+                        bar.frame = CGRectMake(bar.frame.origin.x, self.frame.size.height, bar.frame.size.width, 0);
+                    });
+                }
             }
+        }else{
+            self.alpha = 0.0;
+            self.parent.alpha = 1.0;
+            self.hidden = YES;
+            self.parent.hidden = NO;
         }
-    }else{
-        self.alpha = 0.0;
-        self.parent.alpha = 1.0;
-        self.hidden = YES;
-        self.parent.hidden = NO;
-    }
+    });
 }
 
 -(void)backlightLevelChanged:(CGFloat)level {
     _visible = level > 0.0f;
 }
 
--(void)newAudioDataWasProcessed:(float *)data withLength:(int)length {
-    if (!_visible || !self.parent.shortTime) return;
-    if (!CGRectEqualToRect(self.frame, self.parent.frame)) {
-        dispatch_async(dispatch_get_main_queue(), ^{
+-(void)newAudioData:(float *)data withLength:(int)length sampleRate:(Float64)rate bitDepth:(UInt32)depth {
+    rate /= 2.0f; //For Nyquist
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (!_visible || !_render || self.hidden) return;
+        if (!CGRectEqualToRect(self.frame, self.parent.frame)) {
             [self setFrame:self.parent.frame];
-        });
-        return;
-    }
-    /*
-    NSUInteger n = _bars.count;
-    CGFloat bin_len = MAX_HZ / n;
-    CGFloat original_bin_len = MAX_HZ / length;
-    NSMutableArray<NSNumber *> *bins = [NSMutableArray array];
-    
-    NSUInteger b = 0;
-    for (NSUInteger i = 0; i < n; i++) {
-        [bins addObject:@(0.0f)];
-        while (b * original_bin_len <= bin_len * (i + 1)) {
-            bins[i] = @([[bins objectAtIndex:i] floatValue] + data[b]);
-            b += 1;
+            return;
         }
-        CALayer *bar = [_bars objectAtIndex:i];
-        CGFloat heightMultiplier = [bins[i] floatValue] * pointSensitivity > 0.95 ? 0.95 : [bins[i] floatValue] * pointSensitivity;
         
-        dispatch_async(dispatch_get_main_queue(), ^{
+        float volume = [((SBMediaController *)[NSClassFromString(@"SBMediaController") sharedInstance]) volume];
+        float scale = fmin(sqrt(1 - pow(volume - 1, 2)), 1.0f);
+        
+        NSUInteger n = _bars.count;
+        
+        if (n == 0) return;
+        
+        //float bin_len = rate / (float)n;
+        float original_bin_len = rate / (float)length;
+        float bins[10] = { 0.0f };
+        
+        float base = pow(rate / MIN_HZ, 1.0f / (float)n);
+        
+        int b = 0;
+        for (int i = 0; i < n; i++) {
+            //while (b * original_bin_len <= (i + 1) * bin_len) {
+            while (b * original_bin_len <= MIN_HZ * pow(base, i + 1)) {
+                bins[i] += data[b];
+                b += 1;
+            }
+            CALayer *bar = [_bars objectAtIndex:i];
+            CGFloat heightMultiplier = fmin(fmax(bins[i] * scale, 0.0f), scale);
+            
             bar.backgroundColor = self.pointColor.CGColor;
-            bar.frame = CGRectMake(bar.frame.origin.x, self.frame.size.height, bar.frame.size.width, -fabs(heightMultiplier * self.frame.size.height));
-        });
-    }
-    */
-    float octaves[10] = {0};
-    float offset = 10.0f / _bars.count;
-    float freq = 0;
-    float binWidth = MAX_HZ / length;
-    
-    NSUInteger band = 0;
-    float bandEnd = MIN_HZ * pow(2, 1);
-
-    for(NSUInteger i = 0; i < length; i++) {
-        freq = i > 0 ? i * binWidth : MIN_HZ;
-
-        octaves[band] += data[i];
-
-        if(freq > offset * bandEnd) {
-            band += 1;
-            bandEnd = MIN_HZ * pow(2, band + 1);
+         if (!isnan(self.frame.size.height) && !isnan(heightMultiplier)) {
+             bar.frame = CGRectMake(bar.frame.origin.x, self.frame.size.height, bar.frame.size.width, -fabs(heightMultiplier * self.frame.size.height));
+         }else{
+             bar.frame = CGRectMake(bar.frame.origin.x, self.frame.size.height, bar.frame.size.width, 0.0f);
+         }
         }
-    }
+    });
     
-    for(NSUInteger i = 0; i < _bars.count; i++) {
-        CALayer *bar = [_bars objectAtIndex:i];
-        CGFloat heightMultiplier = octaves[i] * pointSensitivity > 0.95 ? 0.95 : octaves[i] * pointSensitivity;
+        /*
+        float octaves[10] = { 0.0f };
+        float offset = 10.0f / _bars.count;
+        float freq = 0;
+        float binWidth = MAX_HZ / length;
         
-        dispatch_async(dispatch_get_main_queue(), ^{
+        NSUInteger band = 0;
+        float bandEnd = MIN_HZ * pow(2, 1);
+
+        for(NSUInteger i = 0; i < length; i++) {
+            freq = i > 0 ? i * binWidth : MIN_HZ;
+
+            octaves[band] += data[i];
+
+            if(freq > offset * bandEnd) {
+                band += 1;
+                bandEnd = MIN_HZ * pow(2, band + 1);
+            }
+        }
+        
+        for(NSUInteger i = 0; i < _bars.count; i++) {
+            CALayer *bar = [_bars objectAtIndex:i];
+            CGFloat heightMultiplier = octaves[i] * pointSensitivity > 0.95 ? 0.95 : octaves[i] * pointSensitivity;
             bar.backgroundColor = self.pointColor.CGColor;
-            bar.frame = CGRectMake(bar.frame.origin.x, self.frame.size.height, bar.frame.size.width, -fabs(heightMultiplier * self.frame.size.height));
-        });
-    }
+            if (!isnan(self.frame.size.height) && !isnan(heightMultiplier)) {
+                bar.frame = CGRectMake(bar.frame.origin.x, self.frame.size.height, bar.frame.size.width, -fabs(heightMultiplier * self.frame.size.height));
+            }
+        }
+    });
+         */
 }
 
 -(void)dealloc {

@@ -3,7 +3,7 @@ Name: Visualyzer
 Version: 1.0
 Description: Simple status bar audio visualizer.
 Section: Tweaks
-Depends: firmware (>= 14.0), mobilesubstrate, preferenceloader, com.ryannair05.audiosnapshotserver
+Depends: firmware (>= 14.0), mobilesubstrate, preferenceloader
 Conflicts: 
 Replaces: 
 Priority: optional

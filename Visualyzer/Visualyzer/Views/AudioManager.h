@@ -6,7 +6,7 @@
 #import "AudioManagerDelegate.h"
 
 #define SA struct sockaddr
-#define ASSPORT 44333
+#define ASSPORT 43333
 #define MAX_BUFFER_SIZE 16384
 #define FFT_LENGTH 1024
 #define FFT_AIRPODS_LENGTH 256
@@ -27,11 +27,17 @@
     float *_realOut;
     float *_imagOut;
     float *_magnitudes;
+    float *_window;
     float _scalingFactor;
     
     NSMutableArray <id<AudioManagerDelegate>> *_observers;
+    int _peppa;
+    
+    NSLock *_lock;
 }
 +(instancetype)sharedInstance;
 -(void)addObserver:(id<AudioManagerDelegate>)observer;
 -(void)removeObserver:(id<AudioManagerDelegate>)observer;
+-(int)testAndSetupConnection;
+-(void)threadSafeOperation:(void (^)(void))operation;
 @end

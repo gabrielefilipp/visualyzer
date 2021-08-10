@@ -4,5 +4,5 @@
 @required
 -(void)mediaControllerStateChanged:(BOOL)state;
 -(void)backlightLevelChanged:(CGFloat)level;
--(void)newAudioDataWasProcessed:(float*)data withLength:(int)length;
+-(void)newAudioData:(float*)data withLength:(int)length sampleRate:(Float64)rate bitDepth:(UInt32)depth;
 @end

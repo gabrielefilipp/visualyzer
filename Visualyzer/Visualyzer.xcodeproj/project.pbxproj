@@ -165,9 +165,9 @@
 		C15A40C626A5AC2400431E07 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				C15A40BA26A5AC1C00431E07 /* AudioManagerDelegate.h */,
 				C15A40B926A5AC1C00431E07 /* AudioManager.h */,
 				C15A40BC26A5AC1D00431E07 /* AudioManager.m */,
-				C15A40BA26A5AC1C00431E07 /* AudioManagerDelegate.h */,
 				C15A40B826A5AC1C00431E07 /* VisualyzerView.h */,
 				C15A40BD26A5AC1D00431E07 /* VisualyzerView.m */,
 			);
